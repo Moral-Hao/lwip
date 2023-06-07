@@ -650,6 +650,12 @@ etharp_input(struct pbuf *p, struct netif *netif)
 
   LWIP_ERROR("netif != NULL", (netif != NULL), return;);
 
+  if (p->len < sizeof(*hdr)) {
+    ETHARP_STATS_INC(etharp.lenerr);
+    ETHARP_STATS_INC(etharp.drop);
+    pbuf_free(p);
+    return;
+  }
   hdr = (struct etharp_hdr *)p->payload;
 
   /* RFC 826 "Packet Reception": */
