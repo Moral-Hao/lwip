@@ -810,6 +810,7 @@ dhcp_start(struct netif *netif)
 {
   struct dhcp *dhcp;
   err_t result;
+  u8_t dhcp_flags = 0;
 
   LWIP_ASSERT_CORE_LOCKED();
   LWIP_ERROR("netif != NULL", (netif != NULL), return ERR_ARG;);
@@ -843,12 +844,14 @@ dhcp_start(struct netif *netif)
       dhcp_dec_pcb_refcount(); /* free DHCP PCB if not needed any more */
     }
     /* dhcp is cleared below, no need to reset flag*/
+    /* save dhcp memory type flag, so we can restore it after clear data structure */
+    dhcp_flags = dhcp->flags & DHCP_FLAG_EXTERNAL_MEM;
   }
 
   /* clear data structure */
   memset(dhcp, 0, sizeof(struct dhcp));
   /* dhcp_set_state(&dhcp, DHCP_STATE_OFF); */
-
+  dhcp->flags = dhcp_flags;
 
 #if LWIP_DHCP_DOES_ACD_CHECK
   /* add acd struct to list*/
